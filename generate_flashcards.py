@@ -24,14 +24,8 @@ LINE_COLOR = (200, 200, 200)
 
 
 def load_vocabulary(csv_path):
-    expected_cols = FRONT_COLUMNS + BACK_COLUMNS
-    data = []
-    with open(csv_path, mode='r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        next(reader)  # skip header
-        for row in reader:
-            data.append(row)
-    return pd.DataFrame(data, columns=expected_cols)
+    df = pd.read_csv(csv_path)
+    return df[FRONT_COLUMNS + BACK_COLUMNS]
 
 
 def draw_crop_marks(pdf, x, y, card_width, card_height, col, row):
