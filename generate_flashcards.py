@@ -3,6 +3,9 @@ import pandas as pd
 import math
 
 CSV_FILE_PATH = 'vocabulary.csv'
+FRONT_COLUMNS = ["Chinese"]
+BACK_COLUMNS = ["Pinyin", "English"]
+
 OUTPUT_PDF_PATH = 'flashcards_printable.pdf'
 FONT_PATH = 'NotoSansCJKsc-Regular.otf'
 FONT_NAME = 'NotoSans'
@@ -13,8 +16,7 @@ PAGE_HEIGHT = 297
 CARD_COLUMNS = 4
 CARD_ROWS = 6
 
-FONT_SIZE_FRONT = 32
-FONT_SIZE_BACK = 14
+FONT_SIZE_BASE = 32
 
 MARK_LENGTH = 0.5  # mm
 LINE_WIDTH = 0.01  # mm
@@ -22,14 +24,14 @@ LINE_COLOR = (200, 200, 200)
 
 
 def load_vocabulary(csv_path):
+    expected_cols = FRONT_COLUMNS + BACK_COLUMNS
     data = []
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         next(reader)  # skip header
         for row in reader:
-            if len(row) == 3:
-                data.append([row[0], row[1], row[2]])
-    return pd.DataFrame(data, columns=["Chinese", "Pinyin", "English"])
+            data.append(row)
+    return pd.DataFrame(data, columns=expected_cols)
 
 
 def draw_crop_marks(pdf, x, y, card_width, card_height, col, row):
@@ -61,16 +63,18 @@ def draw_crop_marks(pdf, x, y, card_width, card_height, col, row):
         pdf.line(x + card_width, y + card_height - MARK_LENGTH, x + card_width, y + card_height)
 
 
-def draw_card_content(pdf, x, y, card_width, card_height, text, side):
-    if side == 'front':
-        pdf.set_xy(x, y + (card_height / 2) - (FONT_SIZE_FRONT / 2))
-        pdf.cell(card_width, FONT_SIZE_FRONT, text=text, align='C')
-    else:
-        num_lines = text.count('\n') + 1
-        line_height = FONT_SIZE_BACK + 2
-        total_text_height = num_lines * line_height
-        pdf.set_xy(x, y + (card_height / 2) - (total_text_height / 2))
-        pdf.multi_cell(card_width, line_height, text=text, align='C')
+def draw_card_content(pdf, x, y, card_width, card_height, texts):
+    num_lines = len(texts)
+
+    font_size = max(4, FONT_SIZE_BASE/num_lines)
+    pdf.set_font(FONT_NAME, size=font_size)
+
+    total_text_height = num_lines * font_size
+    start_y = y + (card_height / 2) - (total_text_height / 2)
+
+    for i, line in enumerate(texts):
+        pdf.set_xy(x, start_y + i * font_size)
+        pdf.cell(card_width, font_size, text=line, align='C')
 
 
 def generate_flashcards_pdf(df):
@@ -87,7 +91,6 @@ def generate_flashcards_pdf(df):
     for page in range(num_pages):
         for side in ['front', 'back']:
             pdf.add_page()
-            pdf.set_font(FONT_NAME, size=FONT_SIZE_FRONT if side == 'front' else FONT_SIZE_BACK)
 
             for i in range(cards_per_page):
                 idx = page * cards_per_page + i
@@ -103,11 +106,11 @@ def generate_flashcards_pdf(df):
                 draw_crop_marks(pdf, x, y, card_width, card_height, col, row)
 
                 if side == 'front':
-                    text = df.iloc[idx]["Chinese"]
+                    texts = [df.iloc[idx][col_name] for col_name in FRONT_COLUMNS]
                 else:
-                    text = f"{df.iloc[idx]['Pinyin']}\n{df.iloc[idx]['English']}"
+                    texts = [df.iloc[idx][col_name] for col_name in BACK_COLUMNS]
 
-                draw_card_content(pdf, x, y, card_width, card_height, text, side)
+                draw_card_content(pdf, x, y, card_width, card_height, texts)
 
     pdf.output(OUTPUT_PDF_PATH)
 
