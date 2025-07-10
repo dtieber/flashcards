@@ -28,33 +28,25 @@ def load_vocabulary(csv_path):
     return df[FRONT_COLUMNS + BACK_COLUMNS]
 
 
-def draw_crop_marks(pdf, x, y, card_width, card_height, col, row):
+def draw_crop_marks(pdf, x, y, card_w, card_h, col, row):
     pdf.set_line_width(LINE_WIDTH)
     pdf.set_draw_color(*LINE_COLOR)
 
-    # Top-left corner
-    if row != 0:
+    if row > 0:
         pdf.line(x, y, x + MARK_LENGTH, y)
-    if col != 0:
+        pdf.line(x + card_w - MARK_LENGTH, y, x + card_w, y)
+
+    if col > 0:
         pdf.line(x, y, x, y + MARK_LENGTH)
+        pdf.line(x, y + card_h - MARK_LENGTH, x, y + card_h)
 
-    # Top-right corner
-    if row != 0:
-        pdf.line(x + card_width - MARK_LENGTH, y, x + card_width, y)
-    if col != CARD_COLUMNS - 1:
-        pdf.line(x + card_width, y, x + card_width, y + MARK_LENGTH)
+    if row < CARD_ROWS - 1:
+        pdf.line(x, y + card_h, x + MARK_LENGTH, y + card_h)
+        pdf.line(x + card_w - MARK_LENGTH, y + card_h, x + card_w, y + card_h)
 
-    # Bottom-left corner
-    if row != CARD_ROWS - 1:
-        pdf.line(x, y + card_height, x + MARK_LENGTH, y + card_height)
-    if col != 0:
-        pdf.line(x, y + card_height - MARK_LENGTH, x, y + card_height)
-
-    # Bottom-right corner
-    if row != CARD_ROWS - 1:
-        pdf.line(x + card_width - MARK_LENGTH, y + card_height, x + card_width, y + card_height)
-    if col != CARD_COLUMNS - 1:
-        pdf.line(x + card_width, y + card_height - MARK_LENGTH, x + card_width, y + card_height)
+    if col < CARD_COLUMNS - 1:
+        pdf.line(x + card_w, y, x + card_w, y + MARK_LENGTH)
+        pdf.line(x + card_w, y + card_h - MARK_LENGTH, x + card_w, y + card_h)
 
 
 def draw_card_content(pdf, x, y, card_width, card_height, texts):
