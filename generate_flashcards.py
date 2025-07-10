@@ -66,8 +66,7 @@ def generate_flashcards_pdf(df):
     pdf.add_font(FONT_NAME, '', FONT_PATH)
 
     cards_per_page = CARD_COLUMNS * CARD_ROWS
-    card_width = PAGE_WIDTH / CARD_COLUMNS
-    card_height = PAGE_HEIGHT / CARD_ROWS
+    card_w, card_h = PAGE_WIDTH / CARD_COLUMNS, PAGE_HEIGHT / CARD_ROWS
     num_pages = math.ceil(len(df) / cards_per_page)
 
     for page in range(num_pages):
@@ -79,20 +78,14 @@ def generate_flashcards_pdf(df):
                 if idx >= len(df):
                     break
 
-                col = i % CARD_COLUMNS
-                row = i // CARD_COLUMNS
+                col, row = i % CARD_COLUMNS, i // CARD_COLUMNS
+                x, y = col * card_w, row * card_h
 
-                x = col * card_width
-                y = row * card_height
+                draw_crop_marks(pdf, x, y, card_w, card_h, col, row)
 
-                draw_crop_marks(pdf, x, y, card_width, card_height, col, row)
-
-                if side == 'front':
-                    texts = [df.iloc[idx][col_name] for col_name in FRONT_COLUMNS]
-                else:
-                    texts = [df.iloc[idx][col_name] for col_name in BACK_COLUMNS]
-
-                draw_card_content(pdf, x, y, card_width, card_height, texts)
+                selected_cols = FRONT_COLUMNS if side == 'front' else BACK_COLUMNS
+                texts = df.iloc[idx][selected_cols].tolist()
+                draw_card_content(pdf, x, y, card_w, card_h, texts)
 
     pdf.output(OUTPUT_PDF_PATH)
 
