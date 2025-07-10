@@ -3,7 +3,7 @@ import pandas as pd
 import math
 
 CSV_FILE_PATH = 'vocabulary.csv'
-OUTPUT_PDF_PATH = 'chinese_flashcards_printable.pdf'
+OUTPUT_PDF_PATH = 'flashcards_printable.pdf'
 FONT_PATH = 'NotoSansCJKsc-Regular.otf'
 FONT_NAME = 'NotoSans'
 
