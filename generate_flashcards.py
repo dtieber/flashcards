@@ -78,7 +78,8 @@ def generate_flashcards_pdf(df):
                 if idx >= len(df):
                     break
 
-                col, row = i % CARD_COLUMNS, i // CARD_COLUMNS
+                col = CARD_COLUMNS - 1 - (i % CARD_COLUMNS) if side == 'back' else i % CARD_COLUMNS
+                row = i // CARD_COLUMNS
                 x, y = col * card_w, row * card_h
 
                 draw_crop_marks(pdf, x, y, card_w, card_h, col, row)
