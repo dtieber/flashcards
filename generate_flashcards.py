@@ -15,8 +15,8 @@ CARD_COLUMNS, CARD_ROWS = 4, 6
 
 FONT_SIZE_BASE = 32
 MARK_LENGTH = 0.5  # mm
-LINE_WIDTH = 0.01  # mm
-LINE_COLOR = (200, 200, 200)
+LINE_WIDTH = 0.1  # mm
+LINE_COLOR = (20, 20, 20)
 
 
 def load_vocabulary(csv_path):
